@@ -1,0 +1,6 @@
+postgres:
+    port: "8084"
+project:
+    name: stadiums-etl
+webserver:
+    port: "8083"
