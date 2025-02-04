@@ -5,8 +5,11 @@ import re
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 import pandas as pd
 
+# The postgres connection id
 postgres_conn_id = 'postgres'
 
+
+# Define the function to extract and transform the data
 def extract_transform(**kwargs):
     import pandas as pd
     url = 'https://en.wikipedia.org/wiki/List_of_association_football_stadiums_by_capacity'
@@ -22,6 +25,7 @@ def extract_transform(**kwargs):
     kwargs['ti'].xcom_push(key='stadium_data', value=df)
     return df
 
+# Define the function to load the data into the database
 def load_data(**kwargs):
     df = kwargs['ti'].xcom_pull(key='stadium_data', task_ids='extract_transform')
     # Load the transformed data into the database.
@@ -63,7 +67,7 @@ def load_data(**kwargs):
     conn.commit()
     cursor.close()
 
-
+# Define the DAG
 with DAG(
     dag_id="stadiums_pipeline",
     start_date=datetime(2025, 1, 1),
@@ -71,6 +75,7 @@ with DAG(
     catchup=False,
 ) as dag:
     
+    # Define the tasks
     task1 = PythonOperator(
         task_id="extract_transform",
         python_callable=extract_transform,
@@ -81,5 +86,5 @@ with DAG(
         provide_context=True
     )
 
-
+# Define the task dependencies
     task1 >> task2
